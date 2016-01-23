@@ -2,6 +2,7 @@ package chess.piece;
 
 import chess.board.Board;
 import chess.exception.InvalidStartPosition;
+import chess.util.Utils;
 
 /**
  * Chess
@@ -14,6 +15,8 @@ public class Piece implements IPiece {
 
     private final Type type;
     private final Color color;
+    protected int[] normalMoves;
+    private int[] hitMoves;
 
     /**
      * Initialized a piece object, setting its {@link chess.piece.Type} and {@link chess.piece.Color}
@@ -76,5 +79,52 @@ public class Piece implements IPiece {
             }
         }
         return Board.NONE_PIECE;
+    }
+
+    @Override
+    public boolean validMove(int x, int y, int dx, int dy, Board board) {
+        return validNormalMove(x, y, dx, dy, board);
+    }
+
+    private boolean validNormalMove(int x, int y, int dx, int dy, Board board) {
+        boolean ans = false;
+        if (!board.isFieldEmpty(x, y)) {
+            int modifier = color.equalsColor(Color.WHITE) ? -1 : 1;
+            for (int i = 0; i < getNormalMoves().length; i++) {
+                if ((Utils.index(dx - x, dy - y)) == modifier * getNormalMoves()[i])
+                    ans = true;
+            }
+        } else {
+            ans = validHitMove(x, y, dx, dy, board);
+        }
+        return ans;
+    }
+
+    public int[] getNormalMoves() {
+        return normalMoves;
+    }
+
+    public void setNormalMoves(int[] normalMoves) {
+        this.normalMoves = normalMoves;
+    }
+
+    private boolean validHitMove(int x, int y, int dx, int dy, Board board) {
+        boolean ans = false;
+        if (!board.getField(dx, dy).getColor().equalsColor(this.color)) {
+            int modifier = color.equalsColor(Color.WHITE) ? -1 : 1;
+            for (int i = 0; i < getHitMoves().length; i++) {
+                if((Utils.index(dx - x, dy - y)) == modifier * getHitMoves()[i])
+                    ans = true;
+            }
+        }
+        return ans;
+    }
+
+    public int[] getHitMoves() {
+        return hitMoves;
+    }
+
+    public void setHitMoves(int[] hitMoves) {
+        this.hitMoves = hitMoves;
     }
 }

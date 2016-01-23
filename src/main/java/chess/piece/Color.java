@@ -68,4 +68,15 @@ public enum Color {
     public String toString() {
         return "" + id;
     }
+
+    /**
+     * Returns if the object equals a different object.
+     * This means if this object has the same {@link chess.piece.Color} as a different object.
+     *
+     * @param color {@link chess.piece.Type} you want to check equality
+     * @return True if the objects have the same {@link chess.piece.Color}, otherwise false
+     */
+    public boolean equalsColor(Color color) {
+        return this.toString().equals(color.toString());
+    }
 }

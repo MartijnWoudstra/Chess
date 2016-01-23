@@ -85,4 +85,15 @@ public enum Type {
     public String toString() {
         return "" + id;
     }
+
+    /**
+     * Returns if the object equals a different object.
+     * This means if this object has the same {@link chess.piece.Type} as a different object.
+     *
+     * @param type {@link chess.piece.Type} you want to check equality
+     * @return True if the objects have the same {@link chess.piece.Type}, otherwise false
+     */
+    public boolean equalsType(Type type){
+        return this.toString().equals(type.toString());
+    }
 }

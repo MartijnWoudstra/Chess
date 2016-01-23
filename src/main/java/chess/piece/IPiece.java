@@ -1,5 +1,7 @@
 package chess.piece;
 
+import chess.board.Board;
+
 /**
  * Chess
  *
@@ -13,17 +15,23 @@ public interface IPiece {
      * Returns the name of a {@link chess.piece.Piece}
      * @return      String representation of the {@link chess.piece.Piece}
      */
-    public String getName();
+    String getName();
 
     /**
      * Returns the {@link chess.piece.Type} of a {@link chess.piece.Piece}
      * @return      {@link chess.piece.Type} of a {@link chess.piece.Piece}
      */
-    public Type getType();
+    Type getType();
 
     /**
      * Returns the {@link chess.piece.Color} of a {@link chess.piece.Piece}
      * @return       {@link chess.piece.Color} of a {@link chess.piece.Piece}
      */
-    public Color getColor();
+    Color getColor();
+
+    int[] getNormalMoves();
+
+    int[] getHitMoves();
+
+    boolean validMove(int x, int y, int dx, int dy, Board board);
 }
