@@ -1,13 +1,17 @@
 package chess.board;
 
-import chess.exception.EmptyFieldException;
-import chess.exception.InvalidStartPosition;
-import chess.piece.Color;
+import chess.exception.InvalidMoveException;
+import chess.exception.InvalidStartPositionException;
 import chess.piece.Piece;
 import chess.piece.Type;
+import chess.player.Player;
+import chess.util.Utils;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Scanner;
+
+import static chess.piece.PieceLib.*;
 
 /**
  * Chess
@@ -18,26 +22,45 @@ import java.util.Map;
  */
 public class Board {
 
+    /** Dimension of the chess board */
     public static final int DIM = 8;
-    public static final Piece NONE_PIECE = new Piece(Color.NONE, Type.NONE);
+    /**
+     * Map that stores the board. Key is index (starts at 9, ends at 73).
+     * Start is defined by (1 * {@link chess.board.Board#DIM} + 1)
+     * Value is the {@link chess.board.Spot}
+     */
+    Map<Integer, Spot> spots;
+    /** Map of the players. The key is true for the white player, false for the black player. */
+    Map<Boolean, Player> players;
+    /** Ansi value for red */
+    public static final String ANSI_RED = "\u001B[31m";
+    /** Ansi value for reset */
+    public static final String ANSI_RESET = "\u001B[0m";
 
-    Map<Integer, Piece> field;
 
+    /**
+     * Constructor for the {@link chess.board.Board}. Makes the fields, and calls
+     * {@link Board#fillBoard()} and {@link Board#printBoard()}
+     *
+     * @see Board#fillBoard()
+     * @see Board#printBoard()
+     */
     public Board() {
-        field = new HashMap<Integer, Piece>();
+        spots = new HashMap<Integer, Spot>();
+        players = new HashMap<Boolean, Player>();
         fillBoard();
         printBoard();
     }
 
     /**
-     * Fills the board with {@link chess.piece.Piece}s.
+     * Fills the board with {@link chess.piece.Piece}s, according to the official starting rules
      */
     private void fillBoard() {
         for (int x = 1; x < DIM + 1; x++) {
             for (int y = 1; y < DIM + 1; y++) {
                 try {
-                    setField(x, y, Piece.getPieceByStartingPosition(x, y));
-                } catch (InvalidStartPosition invalidStartPosition) {
+                    addField(x, y, Piece.getPieceByStartingPosition(x, y));
+                } catch (InvalidStartPositionException invalidStartPosition) {
                     invalidStartPosition.printStackTrace();
                 }
             }
@@ -45,14 +68,79 @@ public class Board {
     }
 
     /**
+     * Creates a field on the {@link chess.board.Board}
+     *
+     * @param x x-coordinate to create field
+     * @param y y-coordinate to create field
+     * @param piece {@link chess.piece.Piece} to add on the field.
+     */
+    private void addField(int x, int y, Piece piece) {
+        if (getSpot(x, y) == null) {
+            Spot spot = new Spot();
+            spot.setPiece(piece);
+            spots.put(Utils.index(x, y), spot);
+        }
+    }
+
+    /**
      * Sets the field on the board to a specific {@link chess.piece.Piece}
+     * Sets the previous location of the {@link chess.piece.Piece} to null
+     * If the piece is {@link chess.piece.PiecePawn}, calles {@link chess.board.Board#promptAndSetNewPiece(int, int, boolean)}
+     * to request what piece you want.
+     * Calls {@link chess.piece.Piece#setX(int)} and {@link chess.piece.Piece#setY(int)}
      *
      * @param x     x-coordinate to place a {@link chess.piece.Piece}
      * @param y     y-coordinate to place a {@link chess.piece.Piece}
      * @param piece desired {@link chess.piece.Piece} to place
      */
     private void setField(int x, int y, Piece piece) {
-        field.put(y * DIM + x, piece);
+        Piece toPiece = getPiece(x, y);
+        if(toPiece != null) {
+            players.get(toPiece.getIsWhite()).removePiece(piece);
+        }
+        getSpot(piece.getX(), piece.getY()).setEmptyPiece();
+        if((y == 1 && piece.getIsWhite() || y == 8 && !piece.getIsWhite()) && piece.getType().equalsType(Type.PAWN)){
+            promptAndSetNewPiece(x, y, piece.getIsWhite());
+        }
+        else {
+            getSpot(x, y).setPiece(piece);
+            piece.setX(x);
+            piece.setY(y);
+        }
+        printBoard();
+    }
+
+    /**
+     * Prompts user what piece he wants for his pawn
+     *
+     * @param x x-coordinate to place replacer pawn
+     * @param y y-coordinate to place replacer pawn
+     * @param isWhite boolean if the pawn was white
+     */
+    private void promptAndSetNewPiece(int x, int y, boolean isWhite) {
+        boolean answered = false;
+        Type type;
+        Scanner sc = new Scanner(System.in);
+        System.out.println("Enter What you want");
+        while (!answered) {
+            if (sc.hasNext()) {
+                switch (sc.next().toLowerCase()) {
+                    case NAME_HORSE:
+                        type = Type.HORSE;
+                        break;
+                    case NAME_ROOK:
+                        type = Type.ROOK;
+                        break;
+                    case NAME_BISHOP:
+                        type = Type.BISHOP;
+                        break;
+                    default:
+                        type = Type.NONE;
+                }
+                setField(x, y, new Piece(isWhite, type, x, y));
+                answered = true;
+            }
+        }
     }
 
     /**
@@ -67,7 +155,13 @@ public class Board {
         for (int y = 1; y < DIM + 1; y++) {
             System.out.printf("%d  ", y);
             for (int x = 1; x < DIM + 1; x++) {
-                System.out.printf("%s%s  ", getField(x, y).getColor().toString(), getField(x, y).getType().toString());
+                if(getPiece(x, y) == null) {
+                    System.out.printf("--  ");
+                }else {
+                    boolean isWhite = getPiece(x, y).getIsWhite();
+                    System.out.printf("%s%s%s  " + ANSI_RESET, isWhite ? "" : ANSI_RED, isWhite ? CHAR_WHITE : CHAR_BLACK,
+                            getPiece(x, y).getType().toString());
+                }
             }
             System.out.printf("\n");
         }
@@ -80,8 +174,19 @@ public class Board {
      * @param y y-coordinate to request {@link chess.piece.Piece}
      * @return {@link chess.piece.Piece} at (x, y)
      */
-    public Piece getField(int x, int y) {
-        return field.get(y * DIM + x);
+    public Piece getPiece(int x, int y) {
+        return getSpot(x, y).getPiece();
+    }
+
+    /**
+     * Returns the {@link chess.board.Spot} at specific location
+     *
+     * @param x x-coordinate of {@link chess.board.Spot}
+     * @param y y-coordindate of {@link chess.board.Spot}
+     * @return {@link chess.board.Spot} object at coordinates
+     */
+    private Spot getSpot(int x, int y) {
+        return spots.get(Utils.index(x, y));
     }
 
     /**
@@ -93,23 +198,48 @@ public class Board {
      * @return True if both {@link chess.piece.Type}s are equal, otherwise False.
      */
     public boolean isFieldEmpty(int x, int y){
-        return getField(x, y).getType().equalsType(Type.NONE);
+        return getSpot(x, y).isEmpty();
     }
 
     /**
-     * Returns if a {@link chess.piece.Piece} has the same {@link chess.piece.Color} as a {@link chess.piece.Piece} at
-     * (x, y)
+     * Makes a move.
+     * Calls {@link chess.piece.Piece#validMove(Board, int, int)} to see if move is valid
      *
-     * @param x x-coodinate you want to know whether is the same color or not
-     * @param y y-coodinate you want to know whether is the same color or not
-     * @param piece {@link chess.piece.Piece} you want to compare
-     * @throws EmptyFieldException if the field you are checking is empty.
-     * @return True if both {@link chess.piece.Piece}s have the same color, otherwise False.
+     * @param toX x-coordinate you want to move to
+     * @param toY y-coordinate you want to move to
+     * @param piece piece you want to move
+     * @return true if move is done, otherwise false
      */
-    public boolean isSameColor(int x, int y, Piece piece) throws EmptyFieldException {
-        if(isFieldEmpty(x, y))
-            throw new EmptyFieldException(x, y);
-        else
-            return piece.getColor().equalsColor(getField(x, y).getColor());
+    public boolean makeMove(int toX, int toY, Piece piece) {
+        boolean ans = false;
+        if(!(players.size() == 0)) {
+            try {
+                boolean a = piece.validMove(this, toX, toY);
+                if (a) {
+                    setField(toX, toY, piece);
+                    ans = true;
+                }
+            } catch (InvalidMoveException ignored) {
+                ans = false;
+            }
+        }
+        return ans;
+    }
+
+    /**
+     * Adds a player to the game. Only 2 players can connect to one game.
+     * If the player is white, but a white player is connected already, the player is set to black/
+     * calles {@link chess.player.Player#setBoard(Board)}
+     *
+     * @param player {@link chess.player.Player} objet ot add to the game
+     */
+    public void addPlayer(Player player){
+        if(players.size() < 2) {
+            if(players.containsKey(player.isWhite())) {
+                player.setIsWhite(false);
+            }
+            players.put(player.isWhite(), player);
+            player.setBoard(this);
+        }
     }
 }

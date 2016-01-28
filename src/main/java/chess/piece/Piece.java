@@ -1,8 +1,9 @@
 package chess.piece;
 
 import chess.board.Board;
-import chess.exception.InvalidStartPosition;
-import chess.util.Utils;
+import chess.exception.InvalidMoveException;
+import chess.exception.InvalidStartPositionException;
+import chess.lib.ErrorLib;
 
 /**
  * Chess
@@ -13,35 +14,28 @@ import chess.util.Utils;
  */
 public class Piece implements IPiece {
 
+    /** {@link chess.piece.Type} of the current piece */
     private final Type type;
-    private final Color color;
-    protected int[] normalMoves;
-    private int[] hitMoves;
+    /** this value is true if the piece is white, otherwise false */
+    private final boolean isWhite;
+    /** x-coordinate of the piece */
+    private int x;
+    /** y-coordinate of the piece */
+    private int y;
 
     /**
-     * Initialized a piece object, setting its {@link chess.piece.Type} and {@link chess.piece.Color}
+     * Initialized a piece object, setting its {@link chess.piece.Type}. Also sets whether the color is white or not.
      *
-     * @param color {@link chess.piece.Color} object of the piece
+     * @param isWhite whether the piece is white or not
      * @param type  {@link chess.piece.Type} object of the piece
+     * @param x x-coordinate of the piece
+     * @param y y-coordinate of the piece
      */
-    public Piece(Color color, Type type) {
-        this.color = color;
+    public Piece(boolean isWhite, Type type, int x, int y) {
+        this.isWhite = isWhite;
         this.type = type;
-    }
-
-    @Override
-    public String getName() {
-        return color.getName() + type.getName();
-    }
-
-    @Override
-    public Type getType() {
-        return type;
-    }
-
-    @Override
-    public Color getColor() {
-        return color;
+        this.x = x;
+        this.y = y;
     }
 
     /**
@@ -51,80 +45,96 @@ public class Piece implements IPiece {
      * @param x an integer of the x coordinate on the board
      * @param y an integer of the Y coordinate on the board
      * @return {@link chess.piece.Piece} object that belong on (x, y)
-     * @throws InvalidStartPosition if {@code x > 8 || y > 8}
+     * @throws InvalidStartPositionException if {@code x > 8 || y > 8}
      */
-    public static Piece getPieceByStartingPosition(int x, int y) throws InvalidStartPosition {
+    public static Piece getPieceByStartingPosition(int x, int y) throws InvalidStartPositionException {
         if (x > 8 || y > 8)
-            throw new InvalidStartPosition(x, y);
+            throw new InvalidStartPositionException(x, y);
         if (y == 2)
-            return new PiecePawn(Color.BLACK);
+            return new PiecePawn(false, x, y);
         else if (y == 7)
-            return new PiecePawn(Color.BLACK);
+            return new PiecePawn(true, x, y);
         else if (y == 1 || y == 8) {
-            Color color = y == 1 ? Color.BLACK : Color.WHITE;
+            boolean boolIsWhite = y != 1;
             switch (x) {
                 case 1:
                 case 8:
-                    return new PieceRook(color);
+                    return new PieceRook(boolIsWhite, x, y);
                 case 2:
                 case 7:
-                    return new PieceHorse(color);
+                    return new PieceHorse(boolIsWhite, x, y);
                 case 3:
                 case 6:
-                    return new PieceBishop(color);
+                    return new PieceBishop(boolIsWhite, x, y);
                 case 4:
-                    return new PieceQueen(color);
+                    return new PieceQueen(boolIsWhite, x, y);
                 case 5:
-                    return new PieceKing(color);
+                    return new PieceKing(boolIsWhite, x, y);
             }
         }
-        return Board.NONE_PIECE;
+        return null;
     }
 
     @Override
-    public boolean validMove(int x, int y, int dx, int dy, Board board) {
-        return validNormalMove(x, y, dx, dy, board);
+    public String getName() {
+        return (isWhite ? PieceLib.NAME_WHITE : PieceLib.NAME_BLACK) + type.getName();
     }
 
-    private boolean validNormalMove(int x, int y, int dx, int dy, Board board) {
-        boolean ans = false;
-        if (!board.isFieldEmpty(x, y)) {
-            int modifier = color.equalsColor(Color.WHITE) ? -1 : 1;
-            for (int i = 0; i < getNormalMoves().length; i++) {
-                if ((Utils.index(dx - x, dy - y)) == modifier * getNormalMoves()[i])
-                    ans = true;
-            }
-        } else {
-            ans = validHitMove(x, y, dx, dy, board);
+    @Override
+    public Type getType() {
+        return type;
+    }
+
+    @Override
+    public boolean getIsWhite() {
+        return isWhite;
+    }
+
+    @Override
+    public boolean validMove(Board board, int toX, int toY) throws InvalidMoveException{
+        if(toX == x && toY == y){
+            throw new InvalidMoveException(toX, toY, ErrorLib.SAME_LOCATION);
+        } else if (toX < 1 || toX > Board.DIM || toY < 1 || toY > Board.DIM) {
+            throw new InvalidMoveException(toX, toY, ErrorLib.OUTSIDE_FIELD);
+        } else if (!board.isFieldEmpty(toX, toY) && board.getPiece(toX, toY).isWhite && isWhite){
+            throw new InvalidMoveException(toX, toY, ErrorLib.SAME_COLOR);
+        } else if (board.getPiece(toX, toY)  != null){
+                if(board.getPiece(toX, toY).getType().equalsType(Type.KING)) {
+                    throw new InvalidMoveException(toX, toY, ErrorLib.HIT_KING);
+                }
         }
-        return ans;
+        return true;
     }
 
-    public int[] getNormalMoves() {
-        return normalMoves;
+    /**
+     * //todo
+     * @return
+     */
+    public int getX() {
+        return x;
     }
 
-    public void setNormalMoves(int[] normalMoves) {
-        this.normalMoves = normalMoves;
+    /**
+     * //todo
+     * @param x
+     */
+    public void setX(int x) {
+        this.x = x;
     }
 
-    private boolean validHitMove(int x, int y, int dx, int dy, Board board) {
-        boolean ans = false;
-        if (!board.getField(dx, dy).getColor().equalsColor(this.color)) {
-            int modifier = color.equalsColor(Color.WHITE) ? -1 : 1;
-            for (int i = 0; i < getHitMoves().length; i++) {
-                if((Utils.index(dx - x, dy - y)) == modifier * getHitMoves()[i])
-                    ans = true;
-            }
-        }
-        return ans;
+    /**
+     * //todo
+     * @return
+     */
+    public int getY() {
+        return y;
     }
 
-    public int[] getHitMoves() {
-        return hitMoves;
-    }
-
-    public void setHitMoves(int[] hitMoves) {
-        this.hitMoves = hitMoves;
+    /**
+     * //todo
+     * @param y
+     */
+    public void setY(int y) {
+        this.y = y;
     }
 }

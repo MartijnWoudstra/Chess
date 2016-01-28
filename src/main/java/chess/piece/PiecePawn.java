@@ -1,22 +1,28 @@
 package chess.piece;
 
+import chess.board.Board;
+import chess.exception.InvalidMoveException;
 import chess.util.Utils;
 
 /**
- * Chess
- *
- * @author Martijn Woudstra
- * @version 1.0
- * @since 22-1-2016
+ * Created by martijn on 27-1-16.
  */
 public class PiecePawn extends Piece {
 
-    int[] normalMoves = { Utils.index(0, 1) };
-    int[] hitMoves = { Utils.index(1, 1), Utils.index(-1 , 1)};
+    public PiecePawn(boolean isWhite, int x, int y) {
+        super(isWhite, Type.PAWN, x, y);
+    }
 
-    public PiecePawn(Color color) {
-        super(color, Type.PAWN);
-        setNormalMoves(this.normalMoves);
-        setHitMoves(this.hitMoves);
+    @Override
+    public boolean validMove(Board board, int toX, int toY) throws InvalidMoveException {
+        boolean ans;
+        super.validMove(board, toX, toY);
+        if(board.isFieldEmpty(toX, toY)) {
+            ans = Math.abs(Utils.index(toX - getX(), toY - getY())) == Board.DIM;
+        } else {
+            int index = Math.abs(Utils.index(toX - getX(), toY - getY()));
+            ans = index == Board.DIM - 1 || index == Board.DIM + 1;
+        }
+        return ans;
     }
 }

@@ -1,6 +1,7 @@
 package chess.piece;
 
 import chess.board.Board;
+import chess.exception.InvalidMoveException;
 
 /**
  * Chess
@@ -13,25 +14,33 @@ public interface IPiece {
 
     /**
      * Returns the name of a {@link chess.piece.Piece}
+     *
      * @return      String representation of the {@link chess.piece.Piece}
      */
     String getName();
 
     /**
      * Returns the {@link chess.piece.Type} of a {@link chess.piece.Piece}
+     *
      * @return      {@link chess.piece.Type} of a {@link chess.piece.Piece}
      */
     Type getType();
 
     /**
-     * Returns the {@link chess.piece.Color} of a {@link chess.piece.Piece}
-     * @return       {@link chess.piece.Color} of a {@link chess.piece.Piece}
+     * Returns if the piece is white or not
+     *
+     * @return true if piece is white, otherwise false
      */
-    Color getColor();
+    boolean getIsWhite();
 
-    int[] getNormalMoves();
-
-    int[] getHitMoves();
-
-    boolean validMove(int x, int y, int dx, int dy, Board board);
+    /**
+     * Calculates if a move is valid or not
+     *
+     * @param board {@link chess.board.Board} object where the move is placed on
+     * @param toX x-coordinate you want to move to
+     * @param toY y-coordinate you want to move to
+     * @return true if move is valid, otherwise false
+     * @throws InvalidMoveException thrown if move is invalid.
+     */
+    boolean validMove(Board board, int toX, int toY) throws InvalidMoveException;
 }

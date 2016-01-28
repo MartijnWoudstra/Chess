@@ -11,6 +11,7 @@ public enum Type {
     PAWN(PieceLib.CHAR_PAWN), HORSE(PieceLib.CHAR_HORSE), BISHOP(PieceLib.CHAR_BISHOP),
     ROOK(PieceLib.CHAR_ROOK), QUEEN(PieceLib.CHAR_QUEEN), KING(PieceLib.CHAR_KING), NONE(PieceLib.CHAR_NONE);
 
+    /** character representation of the type */
     private final char id;
 
     /**

@@ -9,7 +9,7 @@ package chess.piece;
  */
 public class PieceRook extends Piece {
 
-    public PieceRook(Color color) {
-        super(color, Type.ROOK);
+    public PieceRook(boolean isWhite, int x, int y) {
+        super(isWhite, Type.ROOK, x, y);
     }
 }
