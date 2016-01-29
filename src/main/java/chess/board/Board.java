@@ -2,6 +2,8 @@ package chess.board;
 
 import chess.exception.InvalidMoveException;
 import chess.exception.InvalidStartPositionException;
+import chess.exception.OutOfBoardException;
+import chess.lib.ErrorLib;
 import chess.piece.Piece;
 import chess.piece.Type;
 import chess.player.Player;
@@ -29,9 +31,9 @@ public class Board {
      * Start is defined by (1 * {@link chess.board.Board#DIM} + 1)
      * Value is the {@link chess.board.Spot}
      */
-    Map<Integer, Spot> spots;
+    private Map<Integer, Spot> spots;
     /** Map of the players. The key is true for the white player, false for the black player. */
-    Map<Boolean, Player> players;
+    private Map<Boolean, Player> players;
     /** Ansi value for red */
     public static final String ANSI_RED = "\u001B[31m";
     /** Ansi value for reset */
@@ -85,7 +87,7 @@ public class Board {
     /**
      * Sets the field on the board to a specific {@link chess.piece.Piece}
      * Sets the previous location of the {@link chess.piece.Piece} to null
-     * If the piece is {@link chess.piece.PiecePawn}, calles {@link chess.board.Board#promptAndSetNewPiece(int, int, boolean)}
+     * If the piece is {@link chess.piece.PiecePawn}, calls {@link chess.board.Board#promptAndSetNewPiece(int, int, boolean)}
      * to request what piece you want.
      * Calls {@link chess.piece.Piece#setX(int)} and {@link chess.piece.Piece#setY(int)}
      *
@@ -182,7 +184,7 @@ public class Board {
      * Returns the {@link chess.board.Spot} at specific location
      *
      * @param x x-coordinate of {@link chess.board.Spot}
-     * @param y y-coordindate of {@link chess.board.Spot}
+     * @param y y-coordinate of {@link chess.board.Spot}
      * @return {@link chess.board.Spot} object at coordinates
      */
     private Spot getSpot(int x, int y) {
@@ -193,8 +195,8 @@ public class Board {
      * Returns if a field is empty.
      * Does this by checking if the {@link chess.piece.Type} is equals to {@link chess.piece.Type#NONE}
      *
-     * @param x x-coodinate you want to know whether is empty or not
-     * @param y y-coodinate you want to know whether is empty or not
+     * @param x x-coordinate you want to know whether is empty or not
+     * @param y y-coordinate you want to know whether is empty or not
      * @return True if both {@link chess.piece.Type}s are equal, otherwise False.
      */
     public boolean isFieldEmpty(int x, int y){
@@ -203,25 +205,29 @@ public class Board {
 
     /**
      * Makes a move.
-     * Calls {@link chess.piece.Piece#validMove(Board, int, int)} to see if move is valid
+     * Calls {@link chess.piece.IPiece#validMove(Board, int, int)} to see if move is valid
      *
+     * @param fromX x-coordinate you want to move from
+     * @param fromY y-coordinate you want to move from
      * @param toX x-coordinate you want to move to
      * @param toY y-coordinate you want to move to
      * @param piece piece you want to move
      * @return true if move is done, otherwise false
      */
-    public boolean makeMove(int toX, int toY, Piece piece) {
+    public boolean makeMove(int fromX, int fromY, int toX, int toY, Piece piece) {
         boolean ans = false;
-        if(!(players.size() == 0)) {
-            try {
-                boolean a = piece.validMove(this, toX, toY);
-                if (a) {
-                    setField(toX, toY, piece);
-                    ans = true;
-                }
-            } catch (InvalidMoveException ignored) {
-                ans = false;
+        if(!(players.size() == 0))
+            if (getPiece(fromX, fromY) == null)
+                new InvalidMoveException(fromX, fromY, toX, toY, ErrorLib.NO_PIECE).print();
+        else try {
+            boolean a = piece.validMove(this, toX, toY);
+            if (a) {
+                setField(toX, toY, piece);
+                ans = true;
             }
+        } catch (InvalidMoveException | OutOfBoardException e) {
+            e.print();
+            ans = false;
         }
         return ans;
     }
@@ -229,9 +235,9 @@ public class Board {
     /**
      * Adds a player to the game. Only 2 players can connect to one game.
      * If the player is white, but a white player is connected already, the player is set to black/
-     * calles {@link chess.player.Player#setBoard(Board)}
+     * calls {@link chess.player.Player#setBoard(Board)}
      *
-     * @param player {@link chess.player.Player} objet ot add to the game
+     * @param player {@link chess.player.Player} object ot add to the game
      */
     public void addPlayer(Player player){
         if(players.size() < 2) {

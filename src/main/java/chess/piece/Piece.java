@@ -3,6 +3,7 @@ package chess.piece;
 import chess.board.Board;
 import chess.exception.InvalidMoveException;
 import chess.exception.InvalidStartPositionException;
+import chess.exception.OutOfBoardException;
 import chess.lib.ErrorLib;
 
 /**
@@ -91,16 +92,16 @@ public class Piece implements IPiece {
     }
 
     @Override
-    public boolean validMove(Board board, int toX, int toY) throws InvalidMoveException{
+    public boolean validMove(Board board, int toX, int toY) throws InvalidMoveException, OutOfBoardException {
         if(toX == x && toY == y){
-            throw new InvalidMoveException(toX, toY, ErrorLib.SAME_LOCATION);
+            throw new InvalidMoveException(getX(), getY(), toX, toY, ErrorLib.SAME_LOCATION);
         } else if (toX < 1 || toX > Board.DIM || toY < 1 || toY > Board.DIM) {
-            throw new InvalidMoveException(toX, toY, ErrorLib.OUTSIDE_FIELD);
-        } else if (!board.isFieldEmpty(toX, toY) && board.getPiece(toX, toY).isWhite && isWhite){
-            throw new InvalidMoveException(toX, toY, ErrorLib.SAME_COLOR);
+            throw new OutOfBoardException(toX, toY);
+        } else if (!board.isFieldEmpty(toX, toY) && (board.getPiece(toX, toY).isWhite == isWhite)){
+            throw new InvalidMoveException(getX(), getY(), toX, toY, ErrorLib.SAME_COLOR);
         } else if (board.getPiece(toX, toY)  != null){
                 if(board.getPiece(toX, toY).getType().equalsType(Type.KING)) {
-                    throw new InvalidMoveException(toX, toY, ErrorLib.HIT_KING);
+                    throw new InvalidMoveException(getX(), getY(), toX, toY, ErrorLib.HIT_KING);
                 }
         }
         return true;

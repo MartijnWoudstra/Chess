@@ -12,7 +12,6 @@ import chess.player.Player;
  */
 public class Start {
     public static void main(String[] args) {
-        ;
         Board board = new Board();
         Player player = new Player(true, "martijn");
         board.addPlayer(player);

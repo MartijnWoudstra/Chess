@@ -2,6 +2,7 @@ package chess.piece;
 
 import chess.board.Board;
 import chess.exception.InvalidMoveException;
+import chess.exception.OutOfBoardException;
 
 /**
  * Chess
@@ -42,5 +43,5 @@ public interface IPiece {
      * @return true if move is valid, otherwise false
      * @throws InvalidMoveException thrown if move is invalid.
      */
-    boolean validMove(Board board, int toX, int toY) throws InvalidMoveException;
+    boolean validMove(Board board, int toX, int toY) throws InvalidMoveException, OutOfBoardException;
 }
