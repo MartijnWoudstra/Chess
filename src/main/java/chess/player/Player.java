@@ -14,8 +14,10 @@ public class Player {
 
     /** boolean true if player is white, otherwise false */
     private boolean isWhite;
+
     /** the name of the player */
     private String name;
+
     /**
      * pieces the player has. Key is the type of the piece. Value is how many on the board left
      * @see chess.piece.Piece
@@ -23,7 +25,6 @@ public class Player {
     private Map<Type, Integer> pieces;
     /** {@link chess.board.Board} object */
     private Board board;
-
     public void setBoard(Board board) {
         this.board = board;
         pieces = new HashMap<Type, Integer>();
@@ -72,7 +73,7 @@ public class Player {
      * @return true if move is made, otherwise false
      */
     public boolean makeMove(int fromX, int fromY, int toX, int toY){
-        return board.makeMove(toX, toY, board.getPiece(fromX, fromY));
+        return board.makeMove(fromX, fromY, toX, toY, board.getPiece(fromX, fromY));
     }
 
     /**
@@ -100,5 +101,14 @@ public class Player {
      */
     public void setIsWhite(boolean isWhite) {
         this.isWhite = isWhite;
+    }
+
+    /**
+     * Returns the player name
+     *
+     * @return the player name
+     */
+    public String getName() {
+        return name;
     }
 }

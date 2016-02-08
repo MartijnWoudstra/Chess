@@ -7,7 +7,7 @@ package chess.exception;
  * @version 1.0
  * @since 22-1-2016
  */
-public class InvalidStartPositionException extends Exception {
+public class InvalidStartPositionException extends Exception implements ChessException {
 
     /** the invalid x-coordinate tha that a invalid starting position */
     private int x;
@@ -22,13 +22,9 @@ public class InvalidStartPositionException extends Exception {
     public InvalidStartPositionException(int x, int y) {
         this.x = x;
         this.y = y;
-        print();
     }
 
-    /**
-     * Prints the error message
-     */
-    private void print() {
+    public void print() {
         System.out.printf(String.format("The location %d, %dis no valid starting position", x, y));
     }
 }
