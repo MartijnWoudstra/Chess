@@ -15,14 +15,22 @@ public class PiecePawn extends Piece {
 
     @Override
     public boolean validMove(Board board, int toX, int toY) throws InvalidMoveException {
-        boolean ans;
         super.validMove(board, toX, toY);
+        boolean ans;
+        /*
+        Moving to a empty field. Checks if move is one forward.
+         */
         if(board.isFieldEmpty(toX, toY)) {
             ans = Math.abs(Utils.index(toX - getX(), toY - getY())) == Board.DIM;
-        } else {
+        }
+        /*
+        Hitting can be done in cross direction.
+         */
+        else {
             int index = Math.abs(Utils.index(toX - getX(), toY - getY()));
             ans = index == Board.DIM - 1 || index == Board.DIM + 1;
         }
         return ans;
+        //todo first move 2 places
     }
 }

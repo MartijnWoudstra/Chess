@@ -75,6 +75,42 @@ public class Piece implements IPiece {
         return null;
     }
 
+    /**
+     * Returns the x-coordinate of a piece
+     *
+     * @return x-coordinate
+     */
+    public int getX() {
+        return x;
+    }
+
+    /**
+     * Sets the x-coordinate of a piece
+     *
+     * @param x x-coordinate
+     */
+    public void setX(int x) {
+        this.x = x;
+    }
+
+    /**
+     * Returns the y-coordinate of a piece
+     *
+     * @return y-coordinate
+     */
+    public int getY() {
+        return y;
+    }
+
+    /**
+     * Sets the y-coordinate of a piece
+     *
+     * @param y y-coordinate
+     */
+    public void setY(int y) {
+        this.y = y;
+    }
+
     @Override
     public String getName() {
         return (isWhite ? PieceLib.NAME_WHITE : PieceLib.NAME_BLACK) + type.getName();
@@ -92,49 +128,24 @@ public class Piece implements IPiece {
 
     @Override
     public boolean validMove(Board board, int toX, int toY) throws InvalidMoveException{
+        /* same location*/
         if(toX == x && toY == y){
             throw new InvalidMoveException(toX, toY, ErrorLib.SAME_LOCATION);
-        } else if (toX < 1 || toX > Board.DIM || toY < 1 || toY > Board.DIM) {
+        }
+        /* out of board*/
+        else if (toX < 1 || toX > Board.DIM || toY < 1 || toY > Board.DIM) {
             throw new InvalidMoveException(toX, toY, ErrorLib.OUTSIDE_FIELD);
-        } else if (!board.isFieldEmpty(toX, toY) && board.getPiece(toX, toY).isWhite && isWhite){
+        }
+        /* already occupied by same color*/
+        else if (!board.isFieldEmpty(toX, toY) && board.getPiece(toX, toY).isWhite && isWhite){
             throw new InvalidMoveException(toX, toY, ErrorLib.SAME_COLOR);
-        } else if (board.getPiece(toX, toY)  != null){
+        }
+        /* hitting the king is not allowed.*/
+        else if (board.getPiece(toX, toY)  != null){
                 if(board.getPiece(toX, toY).getType().equalsType(Type.KING)) {
                     throw new InvalidMoveException(toX, toY, ErrorLib.HIT_KING);
                 }
         }
         return true;
-    }
-
-    /**
-     * //todo
-     * @return
-     */
-    public int getX() {
-        return x;
-    }
-
-    /**
-     * //todo
-     * @param x
-     */
-    public void setX(int x) {
-        this.x = x;
-    }
-
-    /**
-     * //todo
-     * @return
-     */
-    public int getY() {
-        return y;
-    }
-
-    /**
-     * //todo
-     * @param y
-     */
-    public void setY(int y) {
-        this.y = y;
     }
 }

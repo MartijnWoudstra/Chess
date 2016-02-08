@@ -1,11 +1,13 @@
 package chess;
 
 import chess.board.Board;
+import chess.board.Movement;
 import chess.piece.Piece;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.InputMismatchException;
 import java.util.Scanner;
 
 /**
@@ -37,16 +39,20 @@ public class InputReader implements Runnable {
                         int x = sc.nextInt();
                         int y = sc.nextInt();
                         Piece piece = board.getPiece(x, y);
+
                         int toX = sc.nextInt();
                         int toY = sc.nextInt();
                         boolean a = board.makeMove(toX, toY, piece);
                         System.out.println(a);
                     }
+                    else {
+                        System.out.println(Movement.isHorizontalOrVertical(board.getPiece(2, 2), sc.nextInt(), sc.nextInt()));
+                    }
                 } else {
                     ended = true;
                 }
-            } catch (IOException | StringIndexOutOfBoundsException e) {
-                e.printStackTrace();
+            } catch (IOException | StringIndexOutOfBoundsException | InputMismatchException e) {
+                System.out.println("Use the correct format! Try again");
             }
         }
     }

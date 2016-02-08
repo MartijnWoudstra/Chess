@@ -82,11 +82,6 @@ public enum Type {
         }
     }
 
-    @Override
-    public String toString() {
-        return "" + id;
-    }
-
     /**
      * Returns if the object equals a different object.
      * This means if this object has the same {@link chess.piece.Type} as a different object.
@@ -96,5 +91,10 @@ public enum Type {
      */
     public boolean equalsType(Type type){
         return this.toString().equals(type.toString());
+    }
+
+    @Override
+    public String toString() {
+        return "" + id;
     }
 }
