@@ -12,19 +12,24 @@ import java.util.Set;
  * @version 1.0
  * @since 29-1-2016
  */
-public class OutOfBoardException extends Exception implements ChessException {
+public class OutOfBoardException extends InvalidMoveException implements ChessException {
 
     Set<Integer> arguments = new HashSet<Integer>();
 
-    public OutOfBoardException(int... args){
-        for(int arg : args){
-            arguments.add(arg);
-        }
+    public OutOfBoardException(int toX, int toY){
+        super(toX, toY);
+        if(toX < 0 || toX > Board.DIM)
+            arguments.add(toX);
+        if(toY < 0 || toY > Board.DIM)
+            arguments.add(toY);
+        setMessage(getMessage());
     }
 
-    public void print(){
-        System.out.printf("The location(s) ");
-        arguments.stream().filter(param -> param > Board.DIM).forEach(param -> System.out.print(param + " "));
-        System.out.print("is/are out of the board dimention!\n");
+    public String getMessage(){
+        String message = "The location(s) ";
+        for(int a : arguments)
+            message += a + " ";
+        message += "is/are out of the board dimention!\n";
+        return message;
     }
 }

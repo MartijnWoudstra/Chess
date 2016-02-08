@@ -36,6 +36,18 @@ public class InvalidMoveException extends Exception implements ChessException {
         this.message = message;
     }
 
+    /**
+     * Constructor for InvalidMoveException.
+     *
+     * @see ErrorLib
+     * @param toX x-coordinate move was attempted to go to
+     * @param toY y-coordinate move was attempted to go to
+     */
+    public InvalidMoveException(int toX, int toY) {
+        this.toX = toX;
+        this.toY = toY;
+    }
+
     public void print() {
         switch (message) {
             case ErrorLib.SAME_LOCATION:
@@ -48,5 +60,9 @@ public class InvalidMoveException extends Exception implements ChessException {
                 System.out.printf(message, toX, toY);
                 break;
         }
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
     }
 }

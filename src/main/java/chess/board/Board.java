@@ -2,7 +2,6 @@ package chess.board;
 
 import chess.exception.InvalidMoveException;
 import chess.exception.InvalidStartPositionException;
-import chess.exception.OutOfBoardException;
 import chess.lib.ErrorLib;
 import chess.piece.Piece;
 import chess.piece.Type;
@@ -225,7 +224,7 @@ public class Board {
                 setField(toX, toY, piece);
                 ans = true;
             }
-        } catch (InvalidMoveException | OutOfBoardException e) {
+        } catch (InvalidMoveException e) {
             e.print();
             ans = false;
         }
